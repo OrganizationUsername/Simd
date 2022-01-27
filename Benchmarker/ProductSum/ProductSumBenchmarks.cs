@@ -7,14 +7,14 @@ namespace Benchmarker.Adding;
 public class ProductSumBenchmarks : AllMethods
 {
     [Benchmark]
-    public double LinqProductSum() => ScalarProd();
+    public double ScalarProductSum() => ScalarProd();
 
     [Benchmark]
-    public double ForLoopProductSum() => VectorProd();
+    public double VectorProductSum() => VectorProd();
 
     [Benchmark]
     public double SSe2SProductSum() => SimdProdRunnerSse2();
 
     [Benchmark(Baseline = true)]
-    public double SpanLoopProductSum() => SimdProdRunnerAvx2();
+    public double Avx2ProductSum() => SimdProdRunnerAvx2();
 }
