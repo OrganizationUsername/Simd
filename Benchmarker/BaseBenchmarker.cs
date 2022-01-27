@@ -2,9 +2,10 @@
 
 namespace Benchmarker;
 
+[SimpleJob]
 public class BaseBenchmarker
 {
-    [Params(1_000, 100_000, 100_000_000)]
+    [Params(1_000, 100_000)]
     public int Count { get; set; }
     public double[] _left;
     public double[] _right;
@@ -24,8 +25,8 @@ public class BaseBenchmarker
 
         _ints = new int[Count];
 
-        _ints = new int[12];
-        for (var i = 0; i < 12; i++)
+        _ints = new int[Count];
+        for (var i = 0; i < Count; i++)
         {
             _ints[i] = ran.Next(1, 10000);
         }

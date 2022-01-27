@@ -2,6 +2,7 @@
 
 namespace Benchmarker.Adding;
 
+[SimpleJob]
 [MemoryDiagnoser]
 public class AddingBenchmarks : AllMethods
 {
