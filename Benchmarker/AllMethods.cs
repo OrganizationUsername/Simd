@@ -137,7 +137,7 @@ public class AllMethods : BaseBenchmarker
         return result;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public double[] ScalarProd()
     {
         var doubleResult = 0d;
@@ -149,8 +149,7 @@ public class AllMethods : BaseBenchmarker
         return new[] { doubleResult };
     }
 
-    //ToDo: This one needs to be fixed up. It allocates much more than it should (nearly zero).
-    [Benchmark]
+    //[Benchmark]
     public double[] VectorProd()
     {
         var sum = Vector<double>.Zero;
@@ -170,7 +169,6 @@ public class AllMethods : BaseBenchmarker
         return new[] { doubleResult + Vector.Dot(sum, Vector<double>.One) };
     }
 
-    [Benchmark(Baseline = true)]
     public double[] SimdProdRunnerAvx2() => SimdProdAvx2(_left, _right);
 
     public unsafe double[] SimdProdAvx2(double[] left, double[] right)
@@ -203,7 +201,6 @@ public class AllMethods : BaseBenchmarker
         return new[] { result };
     }
 
-    [Benchmark]
     public double[] SimdProdRunner() => SimdProdSse2(_left, _right);
 
     public unsafe double[] SimdProdSse2(double[] left, double[] right)

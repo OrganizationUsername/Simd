@@ -17,6 +17,6 @@ public class AddingBenchmarks : AllMethods
     [Benchmark]
     public int SSe2SAddition() => AddIntSse2Span();
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public int Avx2Addition() => AddIntAvx2Span();
 }
