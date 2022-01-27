@@ -1,11 +1,12 @@
 ﻿using BenchmarkDotNet.Running;
+using Benchmarker.Adding;
 
-namespace OtherBenchmarks;
+namespace Benchmarker;
 
 public class Program
 {
     static void Main(string[] args)
     {
-        BenchmarkRunner.Run<OtherBenchmarks>();
+        BenchmarkRunner.Run<AddingBenchmarks>();
     }
 }

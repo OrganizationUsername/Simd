@@ -1,17 +1,17 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using Benchmarker;
 using Xunit;
 
 namespace OtherTests;
 
 public class UnitTest1
 {
-    public int Count { get; set; } = 10;
+    public int Count { get; set; } = 12;
     private readonly double[] _left;
     private readonly double[] _right;
     private readonly int[] _ints;
@@ -32,7 +32,6 @@ public class UnitTest1
         {
             _ints[i] = ran.Next(1, 10000);
         }
-
     }
 
     [Fact]
@@ -51,6 +50,7 @@ public class UnitTest1
     [Fact]
     public void VectorSum()
     {
+        var sum = Vector<double>.Zero;
         var offset = Vector256<double>.Count;
         var result = new double[_left.Length];
         int i;
@@ -58,14 +58,14 @@ public class UnitTest1
         {
             var v1 = new Vector<double>(_left, i);
             var v2 = new Vector<double>(_right, i);
-            (v1 * v2).CopyTo(result, i);
+            sum += (v1 * v2);
         }
         Debug.WriteLine($"Current sum: {result.Sum()}");
         for (; i < _left.Length; ++i)
         {
             result[i] = _left[i] * _right[i];
         }
-        Assert.Equal(2.5105833765556116, result.Sum());
+        Assert.Equal(2.5105833765556116, result.Sum() + Vector.Dot(sum, Vector<double>.One));
     }
 
     [Fact]
@@ -100,32 +100,6 @@ public class UnitTest1
         }
 
         Assert.Equal(2.5105833765556116, result);
-    }
-
-
-
-    [Fact]
-    public void AddIntScalar()
-    {
-        Assert.Equal(66368, _ints.Sum());
-    }
-
-    [Fact]
-    public void AddIntScalarSpan()
-    {
-        var result = 0;
-        foreach (var x in _ints.AsSpan())
-        {
-            result += x;
-        }
-        Assert.Equal(66368, result);
-    }
-
-    [Fact]
-    public void AddIntSse2()
-    {
-        var sum = SumVectorizedSse2(_ints.AsSpan());
-        Assert.Equal(66368, sum);
     }
 
     [Fact]
@@ -220,12 +194,11 @@ public class UnitTest1
             var i = 0;
             var lastBlockIndex = source.Length - (source.Length % offset);
 
-            while (i < lastBlockIndex)
+            for (; i < lastBlockIndex; i += offset)
             {
                 vresult = Sse2.Add(vresult, Sse2.LoadVector128(pSource + i));
-                i += offset;
             }
-            //
+            
             var vresult2 = Ssse3.HorizontalAdd(vresult, vresult);
 
             result = vresult2.ToScalar();
@@ -240,6 +213,7 @@ public class UnitTest1
         var result = SimdProdAvx2(_left, _right);
         Assert.Equal(2.5105833765556116, result[0]);
     }
+
     public unsafe double[] SimdProdAvx2(double[] left, double[] right)
     {
         double result;
@@ -260,13 +234,14 @@ public class UnitTest1
                     Avx2.LoadVector256(pSource + i)
                 );
                 vresult = Avx2.Add(vresult, vTemp);
+
                 i += offset;
             }
-
+            //vresult	<0.09259774366500709, 0.36745012980516484, 0.6013972292266783, 0.7809204750529404>	System.Runtime.Intrinsics.Vector256<double>
             vresult = Avx2.HorizontalAdd(vresult, vresult);
+            //vresult < 0.46004787347017195, 0.46004787347017195, 1.3823177042796186, 1.3823177042796186 > System.Runtime.Intrinsics.Vector256<double>
 
             result = vresult.GetElement(0) + vresult.GetElement(2);
-            //result = vresult.ToScalar();
 
             for (; i < left.Length; i++) { result += pSource[i] * qSource[i]; }
         }
