@@ -7,6 +7,7 @@ public class Program
 {
     static void Main(string[] args)
     {
-        BenchmarkRunner.Run<AddingBenchmarks>();
+        //BenchmarkRunner.Run<AddingBenchmarks>();
+        BenchmarkRunner.Run<ProductSumBenchmarks>();
     }
 }

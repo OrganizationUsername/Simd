@@ -21,9 +21,7 @@ public partial class AllMethods : BaseBenchmarker
         return result;
     }
 
-    //[Benchmark(Baseline = true)]
     public int AddIntSse2Span() => SumVectorizedSse2(_ints.AsSpan());
-
     public unsafe int SumVectorizedSse2(ReadOnlySpan<int> source)
     {
         int result;
@@ -52,7 +50,6 @@ public partial class AllMethods : BaseBenchmarker
     }
 
     public int AddIntAvx2Span() => SumVectorizedAvx2(_ints.AsSpan());
-
     public unsafe int SumVectorizedAvx2(ReadOnlySpan<int> source)
     {
         var result = 0;
@@ -83,6 +80,4 @@ public partial class AllMethods : BaseBenchmarker
         }
         return result;
     }
-
-
 }

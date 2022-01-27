@@ -2,7 +2,6 @@
 
 namespace Benchmarker;
 
-[SimpleJob]
 public class BaseBenchmarker
 {
     [Params(1_000, 100_000)]
