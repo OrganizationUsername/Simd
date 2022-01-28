@@ -9,6 +9,8 @@ public class BaseBenchmarker
     public double[] _left;
     public double[] _right;
     public int[] _ints;
+    public string[] wordList;
+    public int[][] WordListInts;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -29,5 +31,10 @@ public class BaseBenchmarker
         {
             _ints[i] = ran.Next(1, 10000);
         }
+        //"book", "dogs", "plus", "shot" 
+        wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
+
+
+
     }
 }

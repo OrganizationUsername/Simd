@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using Benchmarker;
 using Xunit;
 
 namespace Tester;
@@ -28,6 +29,28 @@ public class ShiftingTests
         {
             _ints[i] = ran.Next(1, 10000);
         }
+    }
+
+    [Fact]
+    public void CheckWordsStuff()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        Assert.Equal(585153120U, am.StringToInt("robot"));
+
+        Assert.Equal("robot", am.IntToString(585153120U));
+
+    }
+
+
+
+    [Fact]
+    public void DoSomething()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var x = am.WordCompare();
+        Assert.Equal(3U, x);
     }
 
     [Fact]
