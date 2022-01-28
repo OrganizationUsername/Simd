@@ -35,13 +35,17 @@ public partial class AllMethods : BaseBenchmarker
         var a = wordList.Select(w => StringToInt(w)).ToArray();
         var letters = new[] { "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss" };
         var b = letters.Select(w => StringToInt(w)).ToArray();
-        return WordCheck(a, b);
+        return WordCheck(a.AsSpan(), b);
     }
 
-    public unsafe uint WordCheck(uint[] left, uint[] right)
+	unsafe uint WordCheck(ReadOnlySpan<uint> left, ReadOnlySpan<uint> right)
     {
         uint result = 0;
         var offset = Vector128<uint>.Count;
+        uint[] sArray = new uint[] { 0U, 0U, 0U, 0U };
+        Vector128<uint> sMask = Vector128.Create(623462976U, 623462976, 623462976, 623462976);
+        Vector128<uint> firstTwo = Vector128.Create((uint)0b11111, 0b11111, 0b11111, 0b11111);
+        //firstTwo.Dump();
         result = 0;
         fixed (uint* qSource = right)
         fixed (uint* pSource = left)
@@ -53,8 +57,17 @@ public partial class AllMethods : BaseBenchmarker
             for (; i < lastBlockIndex; i += offset)
             {
                 var l = Sse2.LoadVector128(pSource + i);
+                //IntToString(l.GetElement(0)).Dump();
+                //l.Dump();
+                l = Sse3.ShiftRightLogical128BitLane(l, 2);
+                var TempThing = Sse2.And(l, sMask);
+                //Sse2.And(TempThing, firstTwo).Dump();
+                //"Temp Thing".Dump();
+                //TempThing.Dump();
+                //IntToString(l.GetElement(0)).Dump();
+                //l.Dump();
                 var r = Sse2.LoadVector128(qSource + i);
-
+                r = Sse3.ShiftRightLogical128BitLane(r, 2);
                 vresult = Sse2.And(l, r);
             }
 
@@ -63,8 +76,6 @@ public partial class AllMethods : BaseBenchmarker
                 result += vresult.GetElement(j);
             }
 
-            result = vresult.ToScalar();
-            for (; i < left.Length; i++) { }
         }
         return result;
     }
