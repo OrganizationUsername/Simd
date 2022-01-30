@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Benchmarker;
@@ -42,15 +43,26 @@ public class ShiftingTests
 
     }
 
-
-
     [Fact]
-    public void DoSomething()
+    public void CheckWordFilterSingle()
     {
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
-        var x = am.WordCompare();
-        Assert.Equal(3U, x);
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 's'));
+        var x = am.GetWordCount(am.wordList, filters);
+        Assert.Equal(2, x);
+    }
+
+    [Fact]
+    public void CheckWordFilterMultiple()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
+        var x = am.GetWordCount(am.wordList, filters);
+        Assert.Equal(3, x);
     }
 
     [Fact]
