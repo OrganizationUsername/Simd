@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
@@ -198,7 +199,8 @@ public partial class AllMethods : BaseBenchmarker
     void WordCheckScalar(uint[] left, uint[] right)
     {
         var i = 0;
-        for (; i < left.Count(); i++)
+        //bool x; //Used for branchless.
+        for (; i < left.Length; i++)
         {
             foreach (var y in right)
             {
@@ -210,6 +212,7 @@ public partial class AllMethods : BaseBenchmarker
                 var maxCount = (y >> 5) & 0b000_111;
                 var minCount = ((y >> 5) & 0b111_000) >> 3;
 
+                //option for branchless: //x = (word & 0b11111 << 00) == (targetLetter << 00); runningCount += (Unsafe.As<bool, int>(ref x));
                 runningCount += (word & 0b11111 << 00) == (targetLetter << 00) ? 1 : 0;
                 runningCount += (word & 0b11111 << 05) == (targetLetter << 05) ? 1 : 0;
                 runningCount += (word & 0b11111 << 10) == (targetLetter << 10) ? 1 : 0;

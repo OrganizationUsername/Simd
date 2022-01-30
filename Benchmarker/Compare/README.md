@@ -1,4 +1,10 @@
 ﻿Current:
+|                        Method |        Mean |     Error |    StdDev |  Ratio | RatioSD |  Gen 0 | Allocated |
+|------------------------------ |------------:|----------:|----------:|-------:|--------:|-------:|----------:|
+|      ScalarFilterAllWordsForS | 71,758.8 ns | 474.82 ns | 444.15 ns | 562.84 |   15.48 |      - |     104 B |
+| SimdFilterAllWordsForSForeach |    127.7 ns |   2.48 ns |   2.95 ns |   1.00 |    0.00 | 0.0167 |     280 B |
+
+Previous:
 |                        Method |         Mean |       Error |      StdDev | Ratio |  Gen 0 | Allocated |
 |------------------------------ |-------------:|------------:|------------:|------:|-------:|----------:|
 |      ScalarFilterAllWordsForS | 209,131.7 ns | 4,182.20 ns | 3,912.03 ns | 1.000 |      - |     104 B |
