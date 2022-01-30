@@ -203,17 +203,24 @@ public partial class AllMethods : BaseBenchmarker
             foreach (var y in right)
             {
                 var word = left[i];
+                //var debugWord = IntToString(word);
                 var targetLetter = y & 0b11111;
+                //var targetL = (char)(targetLetter + 'a');
                 var runningCount = 0;
                 var maxCount = (y >> 5) & 0b000_111;
                 var minCount = ((y >> 5) & 0b111_000) >> 3;
-                for (var j = 0; j < 5; j++)
+
+                runningCount += (word & 0b11111 << 00) == (targetLetter << 00) ? 1 : 0;
+                runningCount += (word & 0b11111 << 05) == (targetLetter << 05) ? 1 : 0;
+                runningCount += (word & 0b11111 << 10) == (targetLetter << 10) ? 1 : 0;
+                runningCount += (word & 0b11111 << 15) == (targetLetter << 15) ? 1 : 0;
+                runningCount += (word & 0b11111 << 20) == (targetLetter << 20) ? 1 : 0;
+
+                if (runningCount > maxCount || runningCount < minCount)
                 {
-                    var letter = word & 0b11111;
-                    if (letter == targetLetter) { runningCount++; }
-                    word >>= 5;
+                    left[i] = 0;
+                    break;
                 }
-                if (runningCount > maxCount || runningCount < minCount) { left[i] = 0; }
             }
         }
     }
