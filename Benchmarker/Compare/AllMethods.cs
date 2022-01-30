@@ -200,15 +200,9 @@ public partial class AllMethods : BaseBenchmarker
         var i = 0;
         for (; i < left.Count(); i++)
         {
-            var word = left[i];
-#if DEBUG
-            if (word == StringToInt("robot"))
-            {
-                var x = 1;
-            }
-#endif
             foreach (var y in right)
             {
+                var word = left[i];
                 var targetLetter = y & 0b11111;
                 var runningCount = 0;
                 var maxCount = (y >> 5) & 0b000_111;
