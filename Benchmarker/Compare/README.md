@@ -1,6 +1,12 @@
 ﻿Current:
 |                        Method |        Mean |     Error |    StdDev |  Ratio | RatioSD |  Gen 0 | Allocated |
 |------------------------------ |------------:|----------:|----------:|-------:|--------:|-------:|----------:|
+|      ScalarFilterAllWordsForS | 74,823.2 ns | 926.04 ns | 866.22 ns | 721.62 |   10.62 |      - |     104 B |
+| SimdFilterAllWordsForSForeach |    103.6 ns |   0.67 ns |   0.59 ns |   1.00 |    0.00 | 0.0167 |     280 B |
+
+Previous:
+|                        Method |        Mean |     Error |    StdDev |  Ratio | RatioSD |  Gen 0 | Allocated |
+|------------------------------ |------------:|----------:|----------:|-------:|--------:|-------:|----------:|
 |      ScalarFilterAllWordsForS | 71,758.8 ns | 474.82 ns | 444.15 ns | 562.84 |   15.48 |      - |     104 B |
 | SimdFilterAllWordsForSForeach |    127.7 ns |   2.48 ns |   2.95 ns |   1.00 |    0.00 | 0.0167 |     280 B |
 

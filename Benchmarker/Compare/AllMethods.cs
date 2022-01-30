@@ -152,30 +152,8 @@ public partial class AllMethods : BaseBenchmarker
                 left[i + 3] = product.GetElement(3);
             }
         }
-        for (; i < left.Count(); i++)
-        {
-            var word = left[i];
-            foreach (var y in right)
-            {
-                var targetLetter = y & 0b11111;
-                var runningCount = 0;
-                var maxCount = (y >> 5) & 0b000_111;
-                var minCount = ((y >> 5) & 0b111_000) >> 3;
-                for (var j = 0; j < 5; j++)
-                {
-                    var letter = word & 0b11111;
-                    if (letter == targetLetter)
-                    {
-                        runningCount++;
-                    }
-                    word >>= 5;
-                }
-                if (runningCount > maxCount || runningCount < minCount)
-                {
-                    left[i] = 0;
-                }
-            }
-        }
+
+        WordCheckScalar( left, right, i );
     }
 
     public new uint StringToInt(string ss)
@@ -196,10 +174,9 @@ public partial class AllMethods : BaseBenchmarker
         return new string(ii.Select(i => (char)i).ToArray());
     }
 
-    void WordCheckScalar(uint[] left, uint[] right)
+    void WordCheckScalar(uint[] left, uint[] right, int i = 0)
     {
-        var i = 0;
-        //bool x; //Used for branchless.
+        bool x; //Used for branchless.
         for (; i < left.Length; i++)
         {
             foreach (var y in right)
@@ -212,18 +189,14 @@ public partial class AllMethods : BaseBenchmarker
                 var maxCount = (y >> 5) & 0b000_111;
                 var minCount = ((y >> 5) & 0b111_000) >> 3;
 
-                //option for branchless: //x = (word & 0b11111 << 00) == (targetLetter << 00); runningCount += (Unsafe.As<bool, int>(ref x));
+                //x = (word & 0b11111 << 00) == (targetLetter << 00); runningCount += (Unsafe.As<bool, byte>(ref x)); //option for branchless: 
                 runningCount += (word & 0b11111 << 00) == (targetLetter << 00) ? 1 : 0;
                 runningCount += (word & 0b11111 << 05) == (targetLetter << 05) ? 1 : 0;
                 runningCount += (word & 0b11111 << 10) == (targetLetter << 10) ? 1 : 0;
                 runningCount += (word & 0b11111 << 15) == (targetLetter << 15) ? 1 : 0;
                 runningCount += (word & 0b11111 << 20) == (targetLetter << 20) ? 1 : 0;
 
-                if (runningCount > maxCount || runningCount < minCount)
-                {
-                    left[i] = 0;
-                    break;
-                }
+                if (runningCount > maxCount || runningCount < minCount) { left[i] = 0; break; }
             }
         }
     }
