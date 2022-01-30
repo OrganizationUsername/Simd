@@ -74,22 +74,21 @@ public partial class AllMethods : BaseBenchmarker
 
     public static uint GetLetterFilter(uint minLetters, uint maxLetters, uint letter) => (minLetters << 8) + (maxLetters << 5) + letter - 'a';
 
-    unsafe void WordCheckSimdForEach(uint[] left, uint[] right)
+    unsafe void WordCheckSimdForEach(uint[] allWords, uint[] letterCountFilters)
     {
         var offset = Vector128<uint>.Count;
         var oneMask = Vector128.Create(1u, 1u, 1u, 1u);
         var letterCountMask = Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
-        Vector128<uint> product;
         var fiveMax = Vector128.Create((uint)0b11111, (uint)0b11111, (uint)0b11111, (uint)0b11111);
         var i = 0;
-        fixed (uint* pSource = left)
+        fixed (uint* pSource = allWords)
         {
-            var lastBlockIndex = left.Length - (left.Length % offset);
+            var lastBlockIndex = allWords.Length - (allWords.Length % offset);
 
             for (; i < lastBlockIndex; i += offset)
             {
-                product = Vector128<uint>.AllBitsSet;
-                foreach (var t in right)
+                var product = Vector128<uint>.AllBitsSet;
+                foreach (var t in letterCountFilters)
                 {
                     var tempThing = Sse2.LoadVector128(pSource + i);
                     var copyOfWord = tempThing;
@@ -133,27 +132,16 @@ public partial class AllMethods : BaseBenchmarker
                     gg = Sse2.AndNot(ff, oneMask.AsInt32());
                     hh = Sse2.And(hh, Sse2.CompareEqual(gg.AsUInt32(), oneMask));
                     product = Sse2.And(Sse2.And(copyOfWord, hh), product);
-#if DEBUG
-                    var word0 = IntToString(product.GetElement(0));
-                    var word1 = IntToString(product.GetElement(1));
-                    var word2 = IntToString(product.GetElement(2));
-                    var word3 = IntToString(product.GetElement(3));
-#endif
                 }
-#if DEBUG
-                var word00 = IntToString(product.GetElement(0));
-                var word10 = IntToString(product.GetElement(1));
-                var word20 = IntToString(product.GetElement(2));
-                var word30 = IntToString(product.GetElement(3));
-#endif
-                left[i + 0] = product.GetElement(0);
-                left[i + 1] = product.GetElement(1);
-                left[i + 2] = product.GetElement(2);
-                left[i + 3] = product.GetElement(3);
+
+                allWords[i + 0] = product.GetElement(0);
+                allWords[i + 1] = product.GetElement(1);
+                allWords[i + 2] = product.GetElement(2);
+                allWords[i + 3] = product.GetElement(3);
             }
         }
 
-        WordCheckScalar( left, right, i );
+        WordCheckScalar(allWords, letterCountFilters, i);
     }
 
     public new uint StringToInt(string ss)
@@ -171,17 +159,17 @@ public partial class AllMethods : BaseBenchmarker
             ii[5 - i - 1] = (char)((l & 0b11111) + 97);
             l >>= 5;
         }
-        return new string(ii.Select(i => (char)i).ToArray());
+        return new(ii.Select(i => (char)i).ToArray());
     }
 
-    void WordCheckScalar(uint[] left, uint[] right, int i = 0)
+    void WordCheckScalar(uint[] allWords, uint[] letterCountFilters, int i = 0)
     {
-        bool x; //Used for branchless.
-        for (; i < left.Length; i++)
+        //bool x; //Used for branchless.
+        for (; i < allWords.Length; i++)
         {
-            foreach (var y in right)
+            var word = allWords[i];
+            foreach (var y in letterCountFilters)
             {
-                var word = left[i];
                 //var debugWord = IntToString(word);
                 var targetLetter = y & 0b11111;
                 //var targetL = (char)(targetLetter + 'a');
@@ -190,13 +178,15 @@ public partial class AllMethods : BaseBenchmarker
                 var minCount = ((y >> 5) & 0b111_000) >> 3;
 
                 //x = (word & 0b11111 << 00) == (targetLetter << 00); runningCount += (Unsafe.As<bool, byte>(ref x)); //option for branchless: 
+                //for (int j = 0; j < 5; j++) { runningCount += (word & 0b11111 << 5 * j) == (targetLetter << 5 * j) ? 1 : 0; } //twice as slow
+
                 runningCount += (word & 0b11111 << 00) == (targetLetter << 00) ? 1 : 0;
                 runningCount += (word & 0b11111 << 05) == (targetLetter << 05) ? 1 : 0;
                 runningCount += (word & 0b11111 << 10) == (targetLetter << 10) ? 1 : 0;
                 runningCount += (word & 0b11111 << 15) == (targetLetter << 15) ? 1 : 0;
                 runningCount += (word & 0b11111 << 20) == (targetLetter << 20) ? 1 : 0;
 
-                if (runningCount > maxCount || runningCount < minCount) { left[i] = 0; break; }
+                if (runningCount > maxCount || runningCount < minCount) { allWords[i] = 0; break; }
             }
         }
     }
