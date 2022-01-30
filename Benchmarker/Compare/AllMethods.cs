@@ -10,6 +10,7 @@ public partial class AllMethods : BaseBenchmarker
     {
         var intArray = words.Select(x => StringToInt(x)).ToArray();
         WordCheckSimdForEach(intArray, filters.ToArray());
+        var tempResult = intArray.Where(x => x > 0).Select(x => IntToString(x)).ToArray();
         return intArray.Count(x => x > 0);
     }
 
@@ -49,11 +50,9 @@ public partial class AllMethods : BaseBenchmarker
 
     public void FilterAllWordsForSScalarBenchmark()
     {
-        var am = new AllMethods() { Count = 12 };
-        am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        am.GetWordCountScalarBenchmark(am.UintWordList, filters);
+        GetWordCountScalarBenchmark(UintWordList, filters);
     }
 
     public int CheckWordFilterMultipleCharsSimd()
@@ -67,11 +66,9 @@ public partial class AllMethods : BaseBenchmarker
 
     public int CheckWordFilterMultipleCharsSimdBenchmark()
     {
-        var am = new AllMethods() { Count = 12 };
-        am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return am.GetWordCountSimdForEach(am.wordList, filters);
+        return GetWordCountSimdForEach(wordList, filters);
     }
 
     public static uint GetLetterFilter(uint minLetters, uint maxLetters, uint letter) => (minLetters << 8) + (maxLetters << 5) + letter - 'a';
@@ -81,7 +78,7 @@ public partial class AllMethods : BaseBenchmarker
         var offset = Vector128<uint>.Count;
         var oneMask = Vector128.Create(1u, 1u, 1u, 1u);
         var letterCountMask = Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
-        var product = Vector128<uint>.Zero;
+        Vector128<uint> product;
         var fiveMax = Vector128.Create((uint)0b11111, (uint)0b11111, (uint)0b11111, (uint)0b11111);
         var i = 0;
         fixed (uint* pSource = left)
@@ -90,6 +87,7 @@ public partial class AllMethods : BaseBenchmarker
 
             for (; i < lastBlockIndex; i += offset)
             {
+                product = Vector128<uint>.AllBitsSet;
                 foreach (var t in right)
                 {
                     var tempThing = Sse2.LoadVector128(pSource + i);
@@ -133,8 +131,20 @@ public partial class AllMethods : BaseBenchmarker
                     ff = Sse2.CompareGreaterThan(ac.AsInt32(), runningCount.AsInt32());
                     gg = Sse2.AndNot(ff, oneMask.AsInt32());
                     hh = Sse2.And(hh, Sse2.CompareEqual(gg.AsUInt32(), oneMask));
-                    product = Sse2.And(copyOfWord, hh);
+                    product = Sse2.And(Sse2.And(copyOfWord, hh), product);
+#if DEBUG
+                    var word0 = IntToString(product.GetElement(0));
+                    var word1 = IntToString(product.GetElement(1));
+                    var word2 = IntToString(product.GetElement(2));
+                    var word3 = IntToString(product.GetElement(3));
+#endif
                 }
+#if DEBUG
+                var word00 = IntToString(product.GetElement(0));
+                var word10 = IntToString(product.GetElement(1));
+                var word20 = IntToString(product.GetElement(2));
+                var word30 = IntToString(product.GetElement(3));
+#endif
                 left[i + 0] = product.GetElement(0);
                 left[i + 1] = product.GetElement(1);
                 left[i + 2] = product.GetElement(2);
@@ -185,18 +195,18 @@ public partial class AllMethods : BaseBenchmarker
         return new string(ii.Select(i => (char)i).ToArray());
     }
 
-    uint WordCheckScalar(uint[] left, uint[] right)
+    void WordCheckScalar(uint[] left, uint[] right)
     {
-        uint result = 0;
-        Vector128.Create(1u, 1u, 1u, 1u);
-        Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
-        Vector128.Create((uint)0b11111, (uint)0b11111, (uint)0b11111, (uint)0b11111);
-        result = 0;
         var i = 0;
-
         for (; i < left.Count(); i++)
         {
             var word = left[i];
+#if DEBUG
+            if (word == StringToInt("robot"))
+            {
+                var x = 1;
+            }
+#endif
             foreach (var y in right)
             {
                 var targetLetter = y & 0b11111;
@@ -206,18 +216,11 @@ public partial class AllMethods : BaseBenchmarker
                 for (var j = 0; j < 5; j++)
                 {
                     var letter = word & 0b11111;
-                    if (letter == targetLetter)
-                    {
-                        runningCount++;
-                    }
+                    if (letter == targetLetter) { runningCount++; }
                     word >>= 5;
                 }
-                if (runningCount > maxCount || runningCount < minCount)
-                {
-                    left[i] = 0;
-                }
+                if (runningCount > maxCount || runningCount < minCount) { left[i] = 0; }
             }
         }
-        return result;
     }
 }

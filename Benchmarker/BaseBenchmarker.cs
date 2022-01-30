@@ -4,7 +4,7 @@ namespace Benchmarker;
 
 public class BaseBenchmarker
 {
-    [Params(1_000, 100_000)]
+    //[Params(1_000, 100_000)]
     public int Count { get; set; }
     public double[] _left;
     public double[] _right;

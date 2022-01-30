@@ -2,13 +2,13 @@
 
 namespace Benchmarker.Adding;
 
-[SimpleJob]
+//[SimpleJob]
 [MemoryDiagnoser]
 public class PruningBenchmarks : AllMethods
 {
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     public void ScalarFilterAllWordsForS() => FilterAllWordsForSScalarBenchmark();
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public void SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdBenchmark();
 }

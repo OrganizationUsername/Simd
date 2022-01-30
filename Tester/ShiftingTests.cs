@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Benchmarker;
@@ -63,7 +61,32 @@ public class ShiftingTests
         am.GlobalSetup();
         Assert.Equal(7417, am.FilterAllWordsForSSimd());
     }
-    
+
+    [Fact]
+    public void GetRobotSimd() //And boort!
+    {
+        var am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 'r'));
+        filters.Add(AllMethods.GetLetterFilter(2, 2, 'o'));
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 'b'));
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 't'));
+        Assert.Equal(2, am.GetWordCountSimd(am.RealFullWordList, filters)); //robot, boort
+    }
+
+    [Fact]
+    public void GetRobotScalar() //And boort!
+    {
+        var am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 'r'));
+        filters.Add(AllMethods.GetLetterFilter(2, 2, 'o'));
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 'b'));
+        filters.Add(AllMethods.GetLetterFilter(1, 1, 't'));
+        Assert.Equal(2, am.GetWordCountScalar(am.RealFullWordList, filters)); //robot, boort
+    }
 
     [Fact]
     public void CheckAllWordFilterScalar()
@@ -91,8 +114,8 @@ public class ShiftingTests
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 5, 's'));
         filters.Add(AllMethods.GetLetterFilter(1, 5, 'o'));
-        var x = am.GetWordCountSimd(am.wordList, filters);
-        Assert.Equal(3, x);
+        var x = am.GetWordCountSimd(am.wordList, filters); //"robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili"
+        Assert.Equal(1, x);
     }
 
 
