@@ -15,10 +15,9 @@ public partial class AllMethods : BaseBenchmarker
         return intArray.Count(x => x > 0);
     }
 
-    public int GetWordCountSimd128Benchmark(string[] words, List<uint> filters)
+    public int GetWordCountSimd128Benchmark(uint[] words, List<uint> filters)
     {
-        var intArray = words.Select(x => StringToInt(x)).ToArray();
-        WordCheckSimd128(intArray, filters.ToArray());
+        WordCheckSimd128(words, filters.ToArray());
         return 0;
     }
 
@@ -69,7 +68,7 @@ public partial class AllMethods : BaseBenchmarker
     {
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return GetWordCountSimd128Benchmark(wordList, filters);
+        return GetWordCountSimd128Benchmark(UintWordList, filters);
     }
 
     public static uint GetLetterFilter(uint minLetters, uint maxLetters, uint letter) => (minLetters << 8) + (maxLetters << 5) + letter - 'a';
