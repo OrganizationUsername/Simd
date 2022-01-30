@@ -50,7 +50,7 @@ public class ShiftingTests
         am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 1, 's'));
-        var x = am.GetWordCountSimd(am.wordList, filters);
+        var x = am.GetWordCountSimd128(am.wordList, filters);
         Assert.Equal(2, x);
     }
 
@@ -72,7 +72,7 @@ public class ShiftingTests
         filters.Add(AllMethods.GetLetterFilter(2, 2, 'o'));
         filters.Add(AllMethods.GetLetterFilter(1, 1, 'b'));
         filters.Add(AllMethods.GetLetterFilter(1, 1, 't'));
-        Assert.Equal(2, am.GetWordCountSimd(am.RealFullWordList, filters)); //robot, boort
+        Assert.Equal(2, am.GetWordCountSimd128(am.RealFullWordList, filters)); //robot, boort
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class ShiftingTests
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 5, 's'));
         filters.Add(AllMethods.GetLetterFilter(1, 5, 'o'));
-        var x = am.GetWordCountSimd(am.wordList, filters); //"robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili"
+        var x = am.GetWordCountSimd128(am.wordList, filters); //"robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili"
         Assert.Equal(1, x);
     }
 

@@ -7,18 +7,18 @@ namespace Benchmarker;
 
 public partial class AllMethods : BaseBenchmarker
 {
-    public int GetWordCountSimd(string[] words, List<uint> filters)
+    public int GetWordCountSimd128(string[] words, List<uint> filters)
     {
         var intArray = words.Select(x => StringToInt(x)).ToArray();
-        WordCheckSimdForEach(intArray, filters.ToArray());
+        WordCheckSimd128(intArray, filters.ToArray());
         var tempResult = intArray.Where(x => x > 0).Select(x => IntToString(x)).ToArray();
         return intArray.Count(x => x > 0);
     }
 
-    public int GetWordCountSimdForEach(string[] words, List<uint> filters)
+    public int GetWordCountSimd128Benchmark(string[] words, List<uint> filters)
     {
         var intArray = words.Select(x => StringToInt(x)).ToArray();
-        WordCheckSimdForEach(intArray, filters.ToArray());
+        WordCheckSimd128(intArray, filters.ToArray());
         return 0;
     }
 
@@ -37,7 +37,7 @@ public partial class AllMethods : BaseBenchmarker
         am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return am.GetWordCountSimd(am.RealFullWordList, filters);
+        return am.GetWordCountSimd128(am.RealFullWordList, filters);
     }
 
     public int FilterAllWordsForSScalar()
@@ -62,19 +62,20 @@ public partial class AllMethods : BaseBenchmarker
         am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return am.GetWordCountSimd(am.wordList, filters);
+        return am.GetWordCountSimd128(am.wordList, filters);
     }
 
     public int CheckWordFilterMultipleCharsSimdBenchmark()
     {
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return GetWordCountSimdForEach(wordList, filters);
+        return GetWordCountSimd128Benchmark(wordList, filters);
     }
 
     public static uint GetLetterFilter(uint minLetters, uint maxLetters, uint letter) => (minLetters << 8) + (maxLetters << 5) + letter - 'a';
 
-    unsafe void WordCheckSimdForEach(uint[] allWords, uint[] letterCountFilters)
+    //ToDo: Make 256 variant
+    unsafe void WordCheckSimd128(uint[] allWords, uint[] letterCountFilters)
     {
         var offset = Vector128<uint>.Count;
         var oneMask = Vector128.Create(1u, 1u, 1u, 1u);
