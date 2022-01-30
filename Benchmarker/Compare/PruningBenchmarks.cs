@@ -10,8 +10,5 @@ public class PruningBenchmarks : AllMethods
     public int ScalarFilterAllWordsForS() => FilterAllWordsForSScalarBenchmark();
 
     [Benchmark]
-    public int SimdFilterAllWordsForS() => FilterAllWordsForSSimdBenchmark();
-
-    [Benchmark]
-    public int SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdForEachBenchmark();
+    public int SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdBenchmark();
 }

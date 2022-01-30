@@ -4,7 +4,7 @@ namespace Benchmarker;
 
 public class BaseBenchmarker
 {
-    //[Params(1_000, 100_000)]
+    [Params(1_000, 100_000)]
     public int Count { get; set; }
     public double[] _left;
     public double[] _right;
@@ -12,6 +12,7 @@ public class BaseBenchmarker
     public string[] wordList;
     public int[][] WordListInts;
     public string[] RealFullWordList;
+    public uint[] UintWordList;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -36,5 +37,12 @@ public class BaseBenchmarker
         wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
 
         RealFullWordList = File.ReadAllLines("FiveLetterWords.txt").ToArray();
+        UintWordList = RealFullWordList.Select(x => StringToInt(x)).ToArray();
+    }
+    public uint StringToInt(string ss)
+    {
+        uint l = 0;
+        for (var i = 0; i < 5; i++) { l |= (byte)(ss[i] - 'a'); l <<= 5; }
+        return l >> 5;
     }
 }
