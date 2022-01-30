@@ -8,7 +8,6 @@ public partial class AllMethods : BaseBenchmarker
 {
     public int GetWordCountSimd(string[] words, List<uint> filters)
     {
-        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
         var intArray = words.Select(x => StringToInt(x)).ToArray();
         WordCheckSimdForEach(intArray, filters.ToArray());
         return intArray.Count(x => x > 0);
@@ -16,22 +15,15 @@ public partial class AllMethods : BaseBenchmarker
 
     public int GetWordCountSimdForEach(string[] words, List<uint> filters)
     {
-        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
         var intArray = words.Select(x => StringToInt(x)).ToArray();
         WordCheckSimdForEach(intArray, filters.ToArray());
         return 0;
     }
 
-    public int GetWordCountScalarBenchmark(uint[] words, List<uint> filters)
-    {
-        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
-        WordCheckScalar(words, filters.ToArray());
-        return 0;
-    }
+    public void GetWordCountScalarBenchmark(uint[] words, List<uint> filters) => WordCheckScalar(words, filters.ToArray());
 
     public int GetWordCountScalar(string[] words, List<uint> filters)
     {
-        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
         var intArray = words.Select(x => StringToInt(x)).ToArray();
         WordCheckScalar(intArray, filters.ToArray());
         return intArray.Count(x => x > 0);
@@ -55,13 +47,13 @@ public partial class AllMethods : BaseBenchmarker
         return am.GetWordCountScalar(am.RealFullWordList, filters);
     }
 
-    public int FilterAllWordsForSScalarBenchmark()
+    public void FilterAllWordsForSScalarBenchmark()
     {
         var am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        return am.GetWordCountScalarBenchmark(am.UintWordList, filters);
+        am.GetWordCountScalarBenchmark(am.UintWordList, filters);
     }
 
     public int CheckWordFilterMultipleCharsSimd()
