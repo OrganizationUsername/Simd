@@ -11,6 +11,7 @@ public class BaseBenchmarker
     public int[] _ints;
     public string[] wordList;
     public int[][] WordListInts;
+    public string[] RealFullWordList;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -34,7 +35,6 @@ public class BaseBenchmarker
         //"book", "dogs", "plus", "shot" 
         wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
 
-
-
+        RealFullWordList = File.ReadAllLines("FiveLetterWords.txt").ToArray();
     }
 }

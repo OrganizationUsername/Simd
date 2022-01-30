@@ -6,14 +6,53 @@ namespace Benchmarker;
 
 public partial class AllMethods : BaseBenchmarker
 {
+    public string[] GetAllFiveLetterWords() => File.ReadAllLines("FiveLetterWords.txt").ToArray();
 
-
-    public int GetWordCount(string[] words, List<uint> filters)
+    public int GetWordCountSimd(string[] words, List<uint> filters)
     {
         //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
         var intArray = words.Select(x => StringToInt(x)).ToArray();
-        WordCheck(intArray, filters.ToArray());
+        WordCheckSimd(intArray, filters.ToArray());
         return intArray.Count(x => x > 0);
+    }
+
+    public int GetWordCountScalar(string[] words, List<uint> filters)
+    {
+        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
+        var intArray = words.Select(x => StringToInt(x)).ToArray();
+        WordCheckScalar(intArray, filters.ToArray());
+        return intArray.Count(x => x > 0);
+    }
+
+
+    public int FilterAllWordsForSSimd()
+    {
+        var am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
+        return am.GetWordCountSimd(am.RealFullWordList, filters);
+    }
+
+
+
+    public int FilterAllWordsForSScalar()
+    {
+        var am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
+        return am.GetWordCountScalar(am.RealFullWordList, filters);
+    }
+
+
+    public int CheckWordFilterMultipleChars()
+    {
+        var am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        var filters = new List<uint>();
+        filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
+        return am.GetWordCountSimd(am.wordList, filters);
     }
 
     public static uint GetLetterFilter(uint minLetters, uint maxLetters, uint letter)
@@ -21,18 +60,15 @@ public partial class AllMethods : BaseBenchmarker
         return (minLetters << 8) + (maxLetters << 5) + letter - 'a';
     }
 
-    unsafe uint WordCheck(uint[] left, uint[] right)
+    unsafe uint WordCheckSimd(uint[] left, uint[] right)
     {
         uint result = 0;
         var offset = Vector128<uint>.Count;
-        Vector128<uint> shifter = Vector128.Create(5u, 5u, 5u, 5u);
-        Vector128<uint> Summer = Vector128<uint>.Zero;
-        Vector128<uint> RunningCount = Vector128<uint>.Zero;
-        Vector128<uint> oneMask = Vector128.Create(1u, 1u, 1u, 1u);
-        Vector128<uint> letterOnlyMask = Vector128.Create(31u, 31u, 31u, 31u);
-        Vector128<uint> TwentyFiveMask = Vector128.Create(33554431u, 33554431u, 33554431u, 33554431u);
-        Vector128<uint> LetterCountMask = Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
-        Vector128<uint> product = Vector128<uint>.Zero;
+        var Summer = Vector128<uint>.Zero;
+        var RunningCount = Vector128<uint>.Zero;
+        var oneMask = Vector128.Create(1u, 1u, 1u, 1u);
+        var LetterCountMask = Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
+        var product = Vector128<uint>.Zero;
         var FiveMax = Vector128.Create((uint)0b11111, (uint)0b11111, (uint)0b11111, (uint)0b11111);
         result = 0;
         var i = 0;
@@ -49,7 +85,7 @@ public partial class AllMethods : BaseBenchmarker
                     var CopyOfWord = TempThing;
                     RunningCount = Vector128<uint>.Zero;
                     var Letters = Vector128.Create((uint)right[j], (uint)right[j], (uint)right[j], (uint)right[j]);
-                    Vector128<uint> letterMask = Sse2.And(Letters, FiveMax);
+                    var letterMask = Sse2.And(Letters, FiveMax);
 
                     //Check 5th position
                     Summer = Sse2.CompareEqual(Sse2.And(TempThing, FiveMax), letterMask);
@@ -87,7 +123,7 @@ public partial class AllMethods : BaseBenchmarker
                     ff = Sse2.CompareGreaterThan(ac.AsInt32(), RunningCount.AsInt32());
                     gg = Sse2.AndNot(ff, oneMask.AsInt32());
                     hh = Sse2.And(hh, Sse2.CompareEqual(gg.AsUInt32(), oneMask));
-                    product = Sse2.And(CopyOfWord, hh);
+                    product = Sse2.And(Sse2.And(CopyOfWord, hh), product);
                 }
                 left[i + 0] = product.GetElement(0);
                 left[i + 1] = product.GetElement(1);
@@ -98,7 +134,7 @@ public partial class AllMethods : BaseBenchmarker
         for (; i < left.Count(); i++)
         {
             var word = left[i];
-            foreach (uint y in right)
+            foreach (var y in right)
             {
                 var targetLetter = y & 0b11111;
                 var runningCount = 0;
@@ -147,54 +183,51 @@ public partial class AllMethods : BaseBenchmarker
         return new string(ii.Select(i => (char)i).ToArray());
     }
 
-    public uint WordCompare()
-    {
-        //wordList = new[] { "robot", "doggy", "mints", "shots", "abash", "ayala", "aural", "brine", "chive", "chili" };
-        var a = wordList.Select(w => StringToInt(w)).ToArray();
-        var letters = new[] { "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss", "sssss" };
-        var b = letters.Select(w => StringToInt(w)).ToArray();
-        return WordCheck(a.AsSpan(), b);
-    }
-
-    unsafe uint WordCheck(ReadOnlySpan<uint> left, ReadOnlySpan<uint> right)
+    unsafe uint WordCheckScalar(uint[] left, uint[] right)
     {
         uint result = 0;
         var offset = Vector128<uint>.Count;
-        uint[] sArray = new uint[] { 0U, 0U, 0U, 0U };
-        Vector128<uint> sMask = Vector128.Create(623462976U, 623462976, 623462976, 623462976);
-        Vector128<uint> firstTwo = Vector128.Create((uint)0b11111, 0b11111, 0b11111, 0b11111);
-        //firstTwo.Dump();
+        var Summer = Vector128<uint>.Zero;
+        var RunningCount = Vector128<uint>.Zero;
+        var oneMask = Vector128.Create(1u, 1u, 1u, 1u);
+        var LetterCountMask = Vector128.Create((uint)0b111, 0b111, 0b111, 0b111);
+        var product = Vector128<uint>.Zero;
+        var FiveMax = Vector128.Create((uint)0b11111, (uint)0b11111, (uint)0b11111, (uint)0b11111);
         result = 0;
+        var i = 0;
         fixed (uint* qSource = right)
         fixed (uint* pSource = left)
         {
-            var vresult = Vector128<uint>.Zero;
-            var i = 0;
             var lastBlockIndex = left.Length - (left.Length % offset);
 
-            for (; i < lastBlockIndex; i += offset)
-            {
-                var l = Sse2.LoadVector128(pSource + i);
-                //IntToString(l.GetElement(0)).Dump();
-                //l.Dump();
-                l = Sse3.ShiftRightLogical128BitLane(l, 2);
-                var TempThing = Sse2.And(l, sMask);
-                //Sse2.And(TempThing, firstTwo).Dump();
-                //"Temp Thing".Dump();
-                //TempThing.Dump();
-                //IntToString(l.GetElement(0)).Dump();
-                //l.Dump();
-                var r = Sse2.LoadVector128(qSource + i);
-                r = Sse3.ShiftRightLogical128BitLane(r, 2);
-                vresult = Sse2.And(l, r);
-            }
-
-            for (int j = 0; j < offset; j++)
-            {
-                result += vresult.GetElement(j);
-            }
-
+            
         }
+        for (; i < left.Count(); i++)
+        {
+            var word = left[i];
+            foreach (var y in right)
+            {
+                var targetLetter = y & 0b11111;
+                var runningCount = 0;
+                var maxCount = (y >> 5) & 0b000_111;
+                var minCount = ((y >> 5) & 0b111_000) >> 3;
+                //count.Dump("count");
+                for (var j = 0; j < 5; j++)
+                {
+                    var letter = word & 0b11111;
+                    if (letter == targetLetter)
+                    {
+                        runningCount++;
+                    }
+                    word >>= 5;
+                }
+                if (runningCount > maxCount || runningCount < minCount)
+                {
+                    left[i] = 0;
+                }
+            }
+        }
+        //left.Dump("Final left");
         return result;
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Benchmarker;
@@ -13,6 +15,7 @@ public class ShiftingTests
     private readonly double[] _left;
     private readonly double[] _right;
     private readonly int[] _ints;
+
 
     public ShiftingTests()
     {
@@ -30,6 +33,7 @@ public class ShiftingTests
         {
             _ints[i] = ran.Next(1, 10000);
         }
+
     }
 
     [Fact]
@@ -38,9 +42,7 @@ public class ShiftingTests
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
         Assert.Equal(18286035U, am.StringToInt("robot"));
-
         Assert.Equal("robot", am.IntToString(18286035U));
-
     }
 
     [Fact]
@@ -50,20 +52,50 @@ public class ShiftingTests
         am.GlobalSetup();
         var filters = new List<uint>();
         filters.Add(AllMethods.GetLetterFilter(1, 1, 's'));
-        var x = am.GetWordCount(am.wordList, filters);
+        var x = am.GetWordCountSimd(am.wordList, filters);
         Assert.Equal(2, x);
     }
+
+    [Fact]
+    public void CheckAllWordFilter()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        Assert.Equal(7417, am.FilterAllWordsForSSimd());
+    }
+    
+
+    [Fact]
+    public void CheckAllWordFilterScalar()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        Assert.Equal(7417, am.FilterAllWordsForSScalar());
+    }
+
+
 
     [Fact]
     public void CheckWordFilterMultiple()
     {
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
+        Assert.Equal(3, am.CheckWordFilterMultipleChars());
+    }
+
+    [Fact]
+    public void CheckWordFilterMultipleLetters()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
         var filters = new List<uint>();
-        filters.Add(AllMethods.GetLetterFilter(1, 2, 's'));
-        var x = am.GetWordCount(am.wordList, filters);
+        filters.Add(AllMethods.GetLetterFilter(1, 5, 's'));
+        filters.Add(AllMethods.GetLetterFilter(1, 5, 'o'));
+        var x = am.GetWordCountSimd(am.wordList, filters);
         Assert.Equal(3, x);
     }
+
+
 
     [Fact]
     public unsafe void Sse2ShortBitMaskShuffle()

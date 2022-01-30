@@ -26,4 +26,10 @@
     <ProjectReference Include="..\Benchmarker\Benchmarker.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="FiveLetterWords.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
