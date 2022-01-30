@@ -15,7 +15,7 @@ public partial class AllMethods : BaseBenchmarker
             l |= (byte)(ss[i] - 'a');
             l <<= 5;
         }
-        return l;
+        return l >> 5;
     }
 
     public string IntToString(uint l)
@@ -23,8 +23,8 @@ public partial class AllMethods : BaseBenchmarker
         var ii = new int[5];
         for (var i = 0; i < 5; i++)
         {
-            l >>= 5;
             ii[5 - i - 1] = (char)((l & 0b11111) + 97);
+            l >>= 5;
         }
         return new string(ii.Select(i => (char)i).ToArray());
     }
@@ -38,7 +38,7 @@ public partial class AllMethods : BaseBenchmarker
         return WordCheck(a.AsSpan(), b);
     }
 
-	unsafe uint WordCheck(ReadOnlySpan<uint> left, ReadOnlySpan<uint> right)
+    unsafe uint WordCheck(ReadOnlySpan<uint> left, ReadOnlySpan<uint> right)
     {
         uint result = 0;
         var offset = Vector128<uint>.Count;

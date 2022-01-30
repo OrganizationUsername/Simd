@@ -36,9 +36,9 @@ public class ShiftingTests
     {
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
-        Assert.Equal(585153120U, am.StringToInt("robot"));
+        Assert.Equal(18286035U, am.StringToInt("robot"));
 
-        Assert.Equal("robot", am.IntToString(585153120U));
+        Assert.Equal("robot", am.IntToString(18286035U));
 
     }
 
@@ -81,7 +81,6 @@ public class ShiftingTests
     public unsafe void Sse2IntBitMaskShuffle()
     {
         var ar = new int[] { 1, 2, 3, 4 };
-
         fixed (int* pSource = ar)
         {
             var vector128 = Sse2.LoadVector128(pSource);
