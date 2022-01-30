@@ -7,8 +7,11 @@ namespace Benchmarker.Adding;
 public class PruningBenchmarks : AllMethods
 {
     [Benchmark(Baseline = true)]
-    public int ScalarFilterAllWordsForS() => FilterAllWordsForSScalar();
+    public int ScalarFilterAllWordsForS() => FilterAllWordsForSScalarBenchmark();
 
     [Benchmark]
-    public int SimdFilterAllWordsForS() => FilterAllWordsForSSimd();
+    public int SimdFilterAllWordsForS() => FilterAllWordsForSSimdBenchmark();
+
+    [Benchmark]
+    public int SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdForEachBenchmark();
 }

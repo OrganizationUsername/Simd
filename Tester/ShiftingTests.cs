@@ -80,7 +80,7 @@ public class ShiftingTests
     {
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
-        Assert.Equal(3, am.CheckWordFilterMultipleChars());
+        Assert.Equal(3, am.CheckWordFilterMultipleCharsSimd());
     }
 
     [Fact]
