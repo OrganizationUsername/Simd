@@ -119,7 +119,7 @@ public class ShiftingTests
     }
 
     [Fact]
-    public void CheckWordCount()
+    public void CheckWordCountCurrent()
     {
         AllMethods am = new AllMethods() { Count = 12 };
         am.GlobalSetup();
@@ -127,6 +127,18 @@ public class ShiftingTests
         (char, int)[] maxCounts = { ('s', 2) };
         Assert.Equal(7417, am.CurrentImplementationTest(minCounts, maxCounts));
     }
+    //    public int CurrentImplementationCompactTest((char, int, int)[] letterCounts)
+
+    [Fact]
+    public void CheckWordCountCurrentCompact()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        (char, int, int)[] minCounts = { ('s', 1, 2) };
+        Assert.Equal(7417, am.CurrentImplementationCompactTest(minCounts));
+    }
+
+
 
     [Fact]
     public unsafe void Sse2ShortBitMaskShuffle()

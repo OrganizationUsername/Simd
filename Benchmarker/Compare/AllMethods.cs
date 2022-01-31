@@ -69,14 +69,49 @@ public partial class AllMethods : BaseBenchmarker
         return wordListCopy.Count(x => x is not null);
     }
 
+    public int CurrentImplementationCompactTest((char, int, int)[] letterCounts)
+    {
+        var wordListCopy = RealFullWordList.ToArray();
+        PrunePossibleWordsCompact(wordListCopy, letterCounts);
+        return wordListCopy.Count(x => x is not null);
+    }
+
     public void CurrentImplementationLinqBenchmark((char, int)[] minCounts, (char, int)[] maxCounts)
     {
         PrunePossibleWordsLinq(RealFullWordList, minCounts, maxCounts);
     }
 
+    public void CurrentImplementationCompactBenchmark((char, int, int)[] letterCounts)
+    {
+        PrunePossibleWordsCompact(RealFullWordList, letterCounts);
+    }
+
     public void CurrentImplementationBenchmark((char, int)[] minCounts, (char, int)[] maxCounts)
     {
         PrunePossibleWords(RealFullWordList, minCounts, maxCounts);
+    }
+
+    public void PrunePossibleWordsCompact(string[] wordList, (char letter, int minCount, int maxCount)[] letterCounts)
+    {
+        for (var i = 0; i < wordList.Length; i++)
+        {
+            var word = wordList[i];
+            if (word is null) continue;
+            for (var index = 0; index < letterCounts.Length; index++)
+            {
+                var n = letterCounts[index];
+
+                int count = 0;
+                foreach (var l in word) { if (l == n.letter) count++; }
+
+                if (count < n.minCount || count > n.maxCount)
+                {
+                    wordList[i] = null;
+                    word = null;
+                    break;
+                }
+            }
+        }
     }
 
     public void PrunePossibleWords(IList<string> wordList, (char letter, int count)[] minCounts, (char letter, int count)[] maxCounts)

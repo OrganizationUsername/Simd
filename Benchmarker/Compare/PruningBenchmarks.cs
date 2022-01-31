@@ -13,6 +13,13 @@ public class PruningBenchmarks : AllMethods
     public void SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdBenchmark();
 
     [Benchmark]
+    public void CurrentImplementationCompacted()
+    {
+        (char, int, int)[] minCounts = { ('s', 1, 2) };
+        CurrentImplementationCompactBenchmark(minCounts);
+    }
+
+    [Benchmark]
     public void CurrentImplementation()
     {
         (char, int)[] minCounts = { ('s', 1) };

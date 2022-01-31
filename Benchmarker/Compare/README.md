@@ -1,4 +1,13 @@
 ﻿Current:
+|                         Method |      Mean |    Error |   StdDev | Ratio | RatioSD |    Gen 0 |   Allocated |
+|------------------------------- |----------:|---------:|---------:|------:|--------:|---------:|------------:|
+|       ScalarFilterAllWordsForS |  78.60 us | 1.406 us | 1.381 us |  3.85 |    0.07 |        - |       104 B |
+|  SimdFilterAllWordsForSForeach |  20.40 us | 0.040 us | 0.035 us |  1.00 |    0.00 |        - |       104 B |
+| CurrentImplementationCompacted |  55.79 us | 0.586 us | 0.549 us |  2.73 |    0.03 |        - |        40 B |
+|          CurrentImplementation | 125.70 us | 0.191 us | 0.179 us |  6.16 |    0.01 |        - |        64 B |
+|      CurrentImplementationLinq | 698.50 us | 8.903 us | 8.328 us | 34.18 |    0.33 | 105.4688 | 1,780,144 B |
+
+Previous:
 |                        Method |      Mean |     Error |    StdDev | Ratio | RatioSD |    Gen 0 |   Allocated |
 |------------------------------ |----------:|----------:|----------:|------:|--------:|---------:|------------:|
 |      ScalarFilterAllWordsForS |  73.04 us |  0.326 us |  0.289 us |  3.54 |    0.03 |        - |       104 B |
