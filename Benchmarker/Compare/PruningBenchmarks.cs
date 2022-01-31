@@ -11,4 +11,20 @@ public class PruningBenchmarks : AllMethods
 
     [Benchmark(Baseline = true)]
     public void SimdFilterAllWordsForSForeach() => CheckWordFilterMultipleCharsSimdBenchmark();
+
+    [Benchmark]
+    public void CurrentImplementation()
+    {
+        (char, int)[] minCounts = { ('s', 1) };
+        (char, int)[] maxCounts = { ('s', 2) };
+        CurrentImplementationBenchmark(minCounts, maxCounts);
+    }
+
+    [Benchmark]
+    public void CurrentImplementationLinq()
+    {
+        (char, int)[] minCounts = { ('s', 1) };
+        (char, int)[] maxCounts = { ('s', 2) };
+        CurrentImplementationLinqBenchmark(minCounts, maxCounts);
+    }
 }

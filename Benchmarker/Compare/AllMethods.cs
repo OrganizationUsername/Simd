@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
+﻿using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
 namespace Benchmarker;
@@ -64,6 +62,95 @@ public partial class AllMethods : BaseBenchmarker
         return am.GetWordCountSimd128(am.wordList, filters);
     }
 
+    public int CurrentImplementationTest((char, int)[] minCounts, (char, int)[] maxCounts)
+    {
+        var wordListCopy = RealFullWordList.ToArray();
+        PrunePossibleWords(wordListCopy, minCounts, maxCounts);
+        return wordListCopy.Count(x => x is not null);
+    }
+
+    public void CurrentImplementationLinqBenchmark((char, int)[] minCounts, (char, int)[] maxCounts)
+    {
+        PrunePossibleWordsLinq(RealFullWordList, minCounts, maxCounts);
+    }
+
+    public void CurrentImplementationBenchmark((char, int)[] minCounts, (char, int)[] maxCounts)
+    {
+        PrunePossibleWords(RealFullWordList, minCounts, maxCounts);
+    }
+
+    public void PrunePossibleWords(IList<string> wordList, (char letter, int count)[] minCounts, (char letter, int count)[] maxCounts)
+    {
+        for (var i = wordList.Count - 1; i >= 0; i--)
+        {
+            var word = wordList[i];
+            if (word is null) continue;
+            for (var index = 0; index < minCounts.Length; index++)
+            {
+                var n = minCounts[index];
+
+                int count = 0;
+                foreach (var l in word) { if (l == n.letter) count++; }
+
+                if (count < n.count)
+                {
+                    wordList[i] = null;
+                    word = null;
+                    break;
+                }
+            }
+
+            if (word is null) continue;
+            for (var index = 0; index < maxCounts.Length; index++)
+            {
+                var n = maxCounts[index];
+
+                int count = 0;
+                foreach (var l in word) { if (l == n.letter) count++; }
+
+                if (count > n.count)
+                {
+                    wordList[i] = null;
+                    word = null;
+                    break;
+                }
+            }
+        }
+    }
+
+    public void PrunePossibleWordsLinq(IList<string> wordList, (char letter, int count)[] minCounts, (char letter, int count)[] maxCounts)
+    {
+        for (var i = wordList.Count - 1; i >= 0; i--)
+        {
+            var word = wordList[i];
+            if (word is null) continue;
+            for (var index = 0; index < minCounts.Length; index++)
+            {
+                var n = minCounts[index];
+
+                if (word.Count(l => l == n.letter) < n.count)
+                {
+                    wordList[i] = null;
+                    word = null;
+                    break;
+                }
+            }
+
+            if (word is null) continue;
+            for (var index = 0; index < maxCounts.Length; index++)
+            {
+                var n = maxCounts[index];
+
+                if (word.Count(l => l == n.letter) > n.count)
+                {
+                    wordList[i] = null;
+                    word = null;
+                    break;
+                }
+            }
+        }
+    }
+
     public int CheckWordFilterMultipleCharsSimdBenchmark()
     {
         var filters = new List<uint>();
@@ -95,9 +182,11 @@ public partial class AllMethods : BaseBenchmarker
                     var runningCount = Vector128<uint>.Zero;
                     var letters = Vector128.Create((uint)t, (uint)t, (uint)t, (uint)t);
                     var letterMask = Sse2.And(letters, fiveMax);
+                    Vector128<uint> summer;
 
                     //Check 5th position
-                    var summer = Sse2.CompareEqual(Sse2.And(tempThing, fiveMax), letterMask);
+
+                    summer = Sse2.CompareEqual(Sse2.And(tempThing, fiveMax), letterMask);
                     runningCount = Sse2.Add(runningCount, Sse2.And(summer, oneMask));
                     tempThing = Sse3.ShiftRightLogical(tempThing, 5);
 

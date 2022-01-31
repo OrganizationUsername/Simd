@@ -118,7 +118,15 @@ public class ShiftingTests
         Assert.Equal(1, x);
     }
 
-
+    [Fact]
+    public void CheckWordCount()
+    {
+        AllMethods am = new AllMethods() { Count = 12 };
+        am.GlobalSetup();
+        (char, int)[] minCounts = { ('s', 1) };
+        (char, int)[] maxCounts = { ('s', 2) };
+        Assert.Equal(7417, am.CurrentImplementationTest(minCounts, maxCounts));
+    }
 
     [Fact]
     public unsafe void Sse2ShortBitMaskShuffle()
